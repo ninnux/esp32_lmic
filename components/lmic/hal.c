@@ -8,14 +8,21 @@
 #include "esp_log.h"
 
 // -----------------------------------------------------------------------------
-
+/*
+// TTGO
 const lmic_pinmap_t lmic_pins = {
-    .nss = 18 ,
+    .nss = 18,
     .rst = 14,
     .dio = {26, 33, 32},
     .spi = {19, 27, 5},
 };
-
+*/
+const lmic_pinmap_t lmic_pins = {
+    .nss = 5 ,
+    .rst = 14,
+    .dio = {33, 32,35},
+    .spi = {19, 23, 18},
+};
 
 // I/O
 
