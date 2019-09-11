@@ -11,6 +11,14 @@ u1_t NWKSKEY[16] = { 0x19, 0xce, 0x3e, 0x90, 0x4a, 0x53, 0x25, 0x98, 0x27, 0xe1,
 u1_t APPSKEY[16] = { 0x8e, 0x20, 0xb0, 0x64, 0xcf, 0x44, 0x21, 0x9a, 0xd2, 0x9c, 0x81, 0x32, 0x98, 0xbc, 0xd6, 0x42 };
 u4_t DEVADDR = 0x079ff83f;
 
+
+//static const u1_t DEVEUI[8]={ 0xC5, 0x5A, 0x7C, 0x0A, 0x00, 0xF0, 0x07, 0x00 };
+//void os_getDevEui (u1_t* buf) { }
+//static const u1_t APPEUI[8]={ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+//void os_getArtEui (u1_t* buf) { }
+//static const u1_t APPKEY[16] = { 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10};
+//void os_getDevKey (u1_t* buf) {  }
+
 void os_getArtEui (u1_t* buf) { }
 void os_getDevEui (u1_t* buf) { }
 void os_getDevKey (u1_t* buf) { }
@@ -66,7 +74,7 @@ void onEvent (ev_t ev) {
             } else {
                 // Prepare upstream data transmission at the next possible time.
                 LMIC_setTxData2(1, mydata, sizeof(mydata)-1, 0);
-                printf("Packet queued");
+                printf("Packet queued\n");
             }
             break;
         case EV_LOST_TSYNC:
@@ -86,7 +94,7 @@ void onEvent (ev_t ev) {
             printf("EV_LINK_ALIVE");
             break;
          default:
-            printf("Unknown event: %d", ev);
+            printf("Unknown event: %d\n", ev);
             break;
     }
 }
@@ -118,14 +126,13 @@ void app_main(void)
   os_init();
 
   LMIC_reset();
-  printf("LMIC RESET");
+  printf("LMIC RESET\n");
 
   uint8_t appskey[sizeof(APPSKEY)];
   uint8_t nwkskey[sizeof(NWKSKEY)];
   memcpy(appskey, APPSKEY, sizeof(APPSKEY));
   memcpy(nwkskey, NWKSKEY, sizeof(NWKSKEY));
   LMIC_setSession (0x1, DEVADDR, nwkskey, appskey);
-
   LMIC_setupChannel(0, 868100000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
   LMIC_setupChannel(1, 868300000, DR_RANGE_MAP(DR_SF12, DR_SF7B), BAND_CENTI);      // g-band
   LMIC_setupChannel(2, 868500000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
@@ -141,6 +148,9 @@ void app_main(void)
   LMIC_setDrTxpow(DR_SF7,14);
 
   for(int i = 1; i <= 8; i++) LMIC_disableChannel(i);
-
+  //printf("Avvio Join\n");
+  //LMIC_startJoining();
+  //printf("Join Completo\n");
+  	
   xTaskCreate(os_runloop, "os_runloop", 1024 * 2, (void* )0, 10, NULL);
 }
