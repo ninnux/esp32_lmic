@@ -12,26 +12,18 @@
 #define SDA_GPIO GPIO_NUM_21
 #define SCL_GPIO GPIO_NUM_22
 
-const char NwkSKEY[32] = CONFIG_netKey, *posn =  NwkSKEY;
-const char AppKEY[32] = CONFIG_appKey, *posa = AppKEY;
-const char DevAdd[8] = CONFIG_devAdd, *posd = DevAdd;
-
-static u1_t NWKSKEY[16];
-static u1_t APPSKEY[16];
-static u1_t DEVADDR[4];
+unsigned int DevAdd;
+unsigned char NetKey[16];
+unsigned char AppKey[16];
 
 void os_getArtEui (u1_t* buf) { }
 void os_getDevEui (u1_t* buf) { }
 void os_getDevKey (u1_t* buf) { }
 
 
-
-
-
-
 static uint8_t msgData[40] = "Ciao!";
 
-const unsigned TX_INTERVAL = 60;
+const unsigned TX_INTERVAL = CONFIG_LORA_TX_INTERVAL;
 
 void onEvent (ev_t ev) {
     printf("%d", os_getTime());
@@ -109,6 +101,17 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
     return ESP_OK;
 }
 
+void sendMessages(void) {
+
+  if (LMIC.opmode & OP_TXRXPEND) {
+      printf("OP_TXRXPEND, not sending");
+  } else {
+      // Prepare upstream data transmission at the next possible time.
+      LMIC_setTxData2(1, msgData, sizeof(msgData)-1, 0);
+      printf("Packet sent");
+  }
+
+}
 
 void bmp280_test(void *pvParamters)
 {
@@ -155,6 +158,7 @@ void bmp280_test(void *pvParamters)
 
         printf("Pressure: %.2f Pa, Temperature: %.2f C", pressure, temperature);
 	sprintf((char*)msgData,"|%.2f|%.2f|0.00|%i|%i|%i",temperature,pressure,b,e,pa);
+	sendMessages();
         if (bme280p)
             printf(", Humidity: %.2f\n", humidity);
         else
@@ -164,31 +168,27 @@ void bmp280_test(void *pvParamters)
 
 
 
-void sendMessages(void* pvParameter)
-{
-    if (!(LMIC.opmode & OP_TXRXPEND)) {
-        printf("Sending message...\n");
-	LMIC_setTxData2(1, msgData, sizeof(msgData) - 1,0);	
-        xTaskCreate(bmp280_test, "bmp280_test", 1024 * 4, (void* )0, 3, NULL);
-	}	
-    vTaskDelay(TX_INTERVAL * 1000 / portTICK_PERIOD_MS);
-    
-}
 
 void lorasetup(void) {
-	for (size_t count = 0; count < sizeof DEVADDR/sizeof *DEVADDR; count++) {
-        sscanf(posd, "%2hhx", &DEVADDR[count]);
-        posd += 2;
+    const char devadd[]= CONFIG_devAdd;   
+    const char netkey[]= CONFIG_netKey , *pn = netkey;
+    const char appkey[]= CONFIG_appKey , *pa = appkey;
+/*
+    for (size_t count = 0; count < sizeof DevAdd/sizeof *DevAdd; count++) {
+        sscanf(da, "%2hhx", &DevAdd[count]);
+        da += 2;
     }
-	for (size_t count = 0; count < sizeof APPSKEY/sizeof *APPSKEY; count++) {
-        sscanf(posa, "%2hhx", &APPSKEY[count]);
-        posa += 2;
-    }
-	for (size_t count = 0; count < sizeof NWKSKEY/sizeof *NWKSKEY; count++) {
-        sscanf(posn, "%2hhx", &NWKSKEY[count]);
-        posn += 2;
-    }
+*/
+    DevAdd = (int)strtol(devadd,NULL, 16);
 
+    for (size_t count = 0; count < sizeof NetKey/sizeof *NetKey; count++) {
+        sscanf(pn, "%2hhx", &NetKey[count]);
+        pn += 2;
+    }
+    for (size_t count = 0; count < sizeof AppKey/sizeof *AppKey; count++) {
+        sscanf(pa, "%2hhx", &AppKey[count]);
+        pa += 2;
+    }
 }
 
 /*
@@ -212,11 +212,7 @@ void app_main(void)
   LMIC_reset();
   printf("LMIC RESET\n");
   lorasetup();
-  uint8_t appskey[16];
-  uint8_t nwkskey[16];
-  memcpy(appskey, APPSKEY, sizeof(APPSKEY));
-  memcpy(nwkskey, NWKSKEY, sizeof(NWKSKEY));
-  LMIC_setSession (0x1, DEVADDR, nwkskey, appskey);
+  LMIC_setSession (0x1, DevAdd, NetKey, AppKey);
   LMIC_setupChannel(0, 868100000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
   LMIC_setupChannel(1, 868300000, DR_RANGE_MAP(DR_SF12, DR_SF7B), BAND_CENTI);      // g-band
   LMIC_setupChannel(2, 868500000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
@@ -237,5 +233,4 @@ void app_main(void)
   //LMIC_startJoining();
   //printf("Join Completo\n");
   xTaskCreate(bmp280_test, "bmp280_test", 1024 * 4, (void* )0, 3, NULL);	
-  xTaskCreate(sendMessages, "send_messages", 1024 * 2, (void* )0, 10, NULL);
 }

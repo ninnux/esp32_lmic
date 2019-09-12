@@ -66,6 +66,12 @@ config LORA_PIN_DIO2
     help
         LoRa Radio DIO1 PIN.
 
+config LORA_TX_INTERVAL 
+    int "TX INTERVAL"
+    default 180
+    help
+        LoRa TX INTERVAL.
+
 endmenu
 
 menu "BMX280 Configuration"
