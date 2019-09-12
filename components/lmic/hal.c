@@ -7,24 +7,25 @@
 #include "driver/timer.h"
 #include "esp_log.h"
 
-// -----------------------------------------------------------------------------
-/*
-// TTGO
-const lmic_pinmap_t lmic_pins = {
-    .nss = 18,
-    .rst = 14,
-    .dio = {26, 33, 32},
-    .spi = {19, 27, 5},
-};
-*/
-const lmic_pinmap_t lmic_pins = {
-    .nss = 5 ,
-    .rst = 14,
-    .dio = {33, 32,35},
-    .spi = {19, 23, 18},
-};
+#define LORA_SPI_HOST      HSPI_HOST
+#define LORA_SPI_DMA_CHAN  1
+#define LORA_PIN_SPI_SCLK  CONFIG_LORA_PIN_SPI_SCLK
+#define LORA_PIN_SPI_MOSI  CONFIG_LORA_PIN_SPI_MOSI
+#define LORA_PIN_SPI_MISO  CONFIG_LORA_PIN_SPI_MISO
+#define LORA_PIN_NSS       CONFIG_LORA_PIN_NSS
+#define LORA_PIN_RXTX      TTN_NOT_CONNECTED
+#define LORA_PIN_RST       CONFIG_LORA_PIN_RST
+#define LORA_PIN_DIO0      CONFIG_LORA_PIN_DIO0
+#define LORA_PIN_DIO1      CONFIG_LORA_PIN_DIO1
+#define LORA_PIN_DIO2      CONFIG_LORA_PIN_DIO2
 
-// I/O
+
+const lmic_pinmap_t lmic_pins = {
+    .nss = LORA_PIN_NSS ,
+    .rst = LORA_PIN_RST,
+    .dio = {LORA_PIN_DIO0, LORA_PIN_DIO1, LORA_PIN_DIO2},
+    .spi = {LORA_PIN_SPI_MISO,LORA_PIN_SPI_MOSI,LORA_PIN_SPI_SCLK},
+};
 
 static void hal_io_init () {
   ESP_LOGI(TAG, "Starting IO initialization");

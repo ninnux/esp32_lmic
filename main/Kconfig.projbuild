@@ -1,0 +1,86 @@
+menu "LoRa Configuration"
+
+config devAdd
+    string "Device Address"
+    default "00000000"
+    help
+        4 Byte DEV EUI address(hex).
+
+config netKey
+    string "Net KEY"
+    default "00000000000000000000000000000000"
+    help
+        16 Byte NETKEY address(hex).
+
+config appKey
+    string "APP Key"
+    default "00000000000000000000000000000000"
+    help
+        16 Byte APP Key (hex).
+
+config LORA_PIN_SPI_SCLK 
+    int "SPI_SCLK PIN"
+    default 5
+    help
+        LoRa CLK PIN.
+
+config LORA_PIN_SPI_MOSI 
+    int "SPI_MOSI PIN"
+    default 27
+    help
+        LoRa MOSI PIN.
+
+config LORA_PIN_SPI_MISO 
+    int "SPI_MISO PIN"
+    default 19
+    help
+        LoRa MISO PIN.
+
+config LORA_PIN_NSS 
+    int "NSS PIN"
+    default 18
+    help
+        LoRa Radio NSS PIN.
+
+config LORA_PIN_RST 
+    int "RST PIN"
+    default 14
+    help
+        LoRa Radio RST PIN.
+
+config LORA_PIN_DIO0 
+    int "DIO0 PIN"
+    default 26
+    help
+        LoRa Radio DIO0 PIN.
+
+config LORA_PIN_DIO1 
+    int "DIO1 PIN"
+    default 33
+    help
+        LoRa Radio DIO1 PIN.
+
+config LORA_PIN_DIO2 
+    int "DIO2 PIN"
+    default 36
+    help
+        LoRa Radio DIO1 PIN.
+
+endmenu
+
+menu "BMX280 Configuration"
+
+config SCA_PIN 
+    int "SCA GPIO PIN"
+    default 21
+    help
+        SCA GPIO PIN.
+
+config SCL_PIN 
+    int "SCL GPIO PIN"
+    default 22
+    help
+        SCL GPIO PIN.
+
+
+endmenu
