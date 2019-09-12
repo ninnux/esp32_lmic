@@ -12,18 +12,13 @@
 #define SDA_GPIO GPIO_NUM_21
 #define SCL_GPIO GPIO_NUM_22
 
-static const u1_t NWKSKEY[16] = { 0xa2, 0x25, 0xb5, 0x22, 0x8f, 0xe5, 0xb8, 0x18, 0xb6, 0x19, 0xc1, 0xb0, 0x9b, 0xc8, 0xdb, 0xd2 };
-static const u1_t APPSKEY[16] = { 0xfa, 0x4c, 0xd4, 0xd2, 0x78, 0x0d, 0x77, 0xc1, 0x03, 0x82, 0xab, 0x77, 0xdb, 0xd8, 0xe7, 0x00 };
-static const u4_t DEVADDR = 0x07a56a5e;
+const char NwkSKEY[32] = CONFIG_netKey, *posn =  NwkSKEY;
+const char AppKEY[32] = CONFIG_appKey, *posa = AppKEY;
+const char DevAdd[8] = CONFIG_devAdd, *posd = DevAdd;
 
-
-
-//static const u1_t DEVEUI[8]={ 0xC5, 0x5A, 0x7C, 0x0A, 0x00, 0xF0, 0x07, 0x00 };
-//void os_getDevEui (u1_t* buf) { }
-//static const u1_t APPEUI[8]={ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-//void os_getArtEui (u1_t* buf) { }
-//static const u1_t APPKEY[16] = { 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10};
-//void os_getDevKey (u1_t* buf) {  }
+static u1_t NWKSKEY[16];
+static u1_t APPSKEY[16];
+static u1_t DEVADDR[4];
 
 void os_getArtEui (u1_t* buf) { }
 void os_getDevEui (u1_t* buf) { }
@@ -180,6 +175,21 @@ void sendMessages(void* pvParameter)
     
 }
 
+void lorasetup(void) {
+	for (size_t count = 0; count < sizeof DEVADDR/sizeof *DEVADDR; count++) {
+        sscanf(posd, "%2hhx", &DEVADDR[count]);
+        posd += 2;
+    }
+	for (size_t count = 0; count < sizeof APPSKEY/sizeof *APPSKEY; count++) {
+        sscanf(posa, "%2hhx", &APPSKEY[count]);
+        posa += 2;
+    }
+	for (size_t count = 0; count < sizeof NWKSKEY/sizeof *NWKSKEY; count++) {
+        sscanf(posn, "%2hhx", &NWKSKEY[count]);
+        posn += 2;
+    }
+
+}
 
 /*
 void os_runloop(void) {
@@ -201,7 +211,7 @@ void app_main(void)
 
   LMIC_reset();
   printf("LMIC RESET\n");
-
+  lorasetup();
   uint8_t appskey[16];
   uint8_t nwkskey[16];
   memcpy(appskey, APPSKEY, sizeof(APPSKEY));
