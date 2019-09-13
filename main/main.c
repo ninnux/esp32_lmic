@@ -113,6 +113,17 @@ void sendMessages(void) {
 
 }
 
+void msg_test(void *pvParamters)
+{
+	int numes = 0;
+	   while (1)
+    		{
+			sprintf((char*)msgData,"Messaggio numero|%i",numes);
+		        sendMessages();	
+			numes += 1;	
+			vTaskDelay(TX_INTERVAL * 1000/ portTICK_PERIOD_MS);
+		}
+}
 void bmp280_test(void *pvParamters)
 {
     bmp280_params_t params;
@@ -232,5 +243,6 @@ void app_main(void)
   //printf("Avvio Join\n");
   //LMIC_startJoining();
   //printf("Join Completo\n");
-  xTaskCreate(bmp280_test, "bmp280_test", 1024 * 4, (void* )0, 3, NULL);	
+  //xTaskCreate(bmp280_test, "bmp280_test", 1024 * 4, (void* )0, 3, NULL);	
+  xTaskCreate(msg_test, "msg_test", 1024 * 4, (void* )0, 3, NULL);	
 }
