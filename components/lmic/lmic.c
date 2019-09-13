@@ -1937,7 +1937,8 @@ static void engineUpdate (void) {
     ostime_t now    = os_getTime();
     ostime_t rxtime = 0;
     ostime_t txbeg  = 0;
-
+   	// Debug
+	//reportEvent(LMIC.opmode); 
     if( (LMIC.opmode & OP_TRACK) != 0 ) {
         // We are tracking a beacon
         ASSERT( now + RX_RAMPUP - LMIC.bcnRxtime <= 0 );
@@ -1971,7 +1972,8 @@ static void engineUpdate (void) {
         // Earliest possible time vs overhead to setup radio
         if( txbeg - (now + TX_RAMPUP) < 0 ) {
             // We could send right now!
-        txbeg = now;
+            txbeg = now;
+	    
             dr_t txdr = (dr_t)LMIC.datarate;
             if( jacc ) {
                 u1_t ftype;
@@ -2010,6 +2012,8 @@ static void engineUpdate (void) {
             }
             LMIC.rps    = setCr(updr2rps(txdr), (cr_t)LMIC.errcr);
             LMIC.dndr   = txdr;  // carry TX datarate (can be != LMIC.datarate) over to txDone/setupRx1
+	    //debug
+	    //reportEvent(21);
             LMIC.opmode = (LMIC.opmode & ~(OP_POLL|OP_RNDTX)) | OP_TXRXPEND | OP_NEXTCHNL;
             updateTx(txbeg);
             reportEvent(EV_TXSTART);

@@ -16,12 +16,18 @@ unsigned int DevAdd;
 unsigned char NetKey[16];
 unsigned char AppKey[16];
 
+
+u1_t NWKSKEY[16] = { 0xa2, 0x25, 0xb5, 0x22, 0x8f, 0xe5, 0xb8, 0x18, 0xb6, 0x19, 0xc1, 0xb0, 0x9b, 0xc8, 0xdb, 0xd2 };
+u1_t APPSKEY[16] = { 0xfa, 0x4c, 0xd4, 0xd2, 0x78, 0x0d, 0x77, 0xc1, 0x03, 0x82, 0xab, 0x77, 0xdb, 0xd8, 0xe7, 0x00 };
+u4_t DEVADDR = 0x07a56a5e;
+
 void os_getArtEui (u1_t* buf) { }
 void os_getDevEui (u1_t* buf) { }
 void os_getDevKey (u1_t* buf) { }
 
 
 static uint8_t msgData[40] = "Ciao!";
+unsigned char mydata[] = "Ciao!";
 
 const unsigned TX_INTERVAL = CONFIG_LORA_TX_INTERVAL;
 
@@ -30,65 +36,68 @@ void onEvent (ev_t ev) {
     printf(": ");
     switch(ev) {
         case EV_SCAN_TIMEOUT:
-            printf("EV_SCAN_TIMEOUT");
+            printf("EV_SCAN_TIMEOUT\n");
             break;
         case EV_BEACON_FOUND:
-            printf("EV_BEACON_FOUND");
+            printf("EV_BEACON_FOUND\n");
             break;
         case EV_BEACON_MISSED:
-            printf("EV_BEACON_MISSED");
+            printf("EV_BEACON_MISSED\n");
             break;
         case EV_BEACON_TRACKED:
-            printf("EV_BEACON_TRACKED");
+            printf("EV_BEACON_TRACKED\n");
             break;
         case EV_JOINING:
-            printf("EV_JOINING");
+            printf("EV_JOINING\n");
             break;
         case EV_JOINED:
-            printf("EV_JOINED");
+            printf("EV_JOINED\n");
             break;
         case EV_RFU1:
-            printf("EV_RFU1");
+            printf("EV_RFU1\n");
             break;
         case EV_JOIN_FAILED:
-            printf("EV_JOIN_FAILED");
+            printf("EV_JOIN_FAILED\n");
             break;
         case EV_REJOIN_FAILED:
-            printf("EV_REJOIN_FAILED");
+            printf("EV_REJOIN_FAILED\n");
             break;
         case EV_TXCOMPLETE:
-            printf("EV_TXCOMPLETE (includes waiting for RX windows)");
+            printf("EV_TXCOMPLETE (includes waiting for RX windows)\n");
             if (LMIC.txrxFlags & TXRX_ACK)
-              printf("Received ack");
+              printf("Received ack\n");
             if (LMIC.dataLen) {
-              printf("Received ");
+              printf("Received \n");
               printf(LMIC.dataLen);
-              printf(" bytes of payload");
+              printf(" bytes of payload\n");
             }
 
             if (LMIC.opmode & OP_TXRXPEND) {
-                printf("OP_TXRXPEND, not sending");
+                printf("OP_TXRXPEND, not sending\n");
             } else {
                 // Prepare upstream data transmission at the next possible time.
                 LMIC_setTxData2(1, msgData, sizeof(msgData)-1, 0);
                 printf("Packet queued\n");
             }
             break;
+	case EV_TXSTART:
+	    printf("EV_TXSTART\n");
+            break;
         case EV_LOST_TSYNC:
-            printf("EV_LOST_TSYNC");
+            printf("EV_LOST_TSYNC\n");
             break;
         case EV_RESET:
-            printf("EV_RESET");
+            printf("EV_RESET\n");
             break;
         case EV_RXCOMPLETE:
             // data received in ping slot
-            printf("EV_RXCOMPLETE");
+            printf("EV_RXCOMPLETE\n");
             break;
         case EV_LINK_DEAD:
-            printf("EV_LINK_DEAD");
+            printf("EV_LINK_DEAD\n");
             break;
         case EV_LINK_ALIVE:
-            printf("EV_LINK_ALIVE");
+            printf("EV_LINK_ALIVE\n");
             break;
          default:
             printf("Unknown event: %d\n", ev);
@@ -116,11 +125,14 @@ void sendMessages(void) {
 void msg_test(void *pvParamters)
 {
 	int numes = 0;
+	printf("Eccolo!\n");
 	   while (1)
     		{
-			sprintf((char*)msgData,"Messaggio numero|%i",numes);
+			printf("Eccolo2\n");
+	//		sprintf((char*)msgData,"Messaggio numero|%i",numes);
 		        sendMessages();	
-			numes += 1;	
+			printf("Eccolo1\n");
+ //			numes += 1;	
 			vTaskDelay(TX_INTERVAL * 1000/ portTICK_PERIOD_MS);
 		}
 }
@@ -202,7 +214,7 @@ void lorasetup(void) {
     }
 }
 
-/*
+
 void os_runloop(void) {
 
   if (LMIC.opmode & OP_TXRXPEND) {
@@ -212,18 +224,28 @@ void os_runloop(void) {
       LMIC_setTxData2(1, mydata, sizeof(mydata)-1, 0);
       printf("Packet queued");
   }
- vTaskDelay(TX_INTERVAL * 1000 / portTICK_PERIOD_MS);
+    while(1) {
+    	os_run();
+	vTaskDelay(10 / portTICK_PERIOD_MS);
+// 	vTaskDelay(TX_INTERVAL * 1000 / portTICK_PERIOD_MS);
+	}
 
 }
-*/
+
 void app_main(void)
 {
   os_init();
 
   LMIC_reset();
   printf("LMIC RESET\n");
-  lorasetup();
-  LMIC_setSession (0x1, DevAdd, NetKey, AppKey);
+//  lorasetup();
+//  LMIC_setSession (0x1, DevAdd, NetKey, AppKey);
+  uint8_t appskey[sizeof(APPSKEY)];
+  uint8_t nwkskey[sizeof(NWKSKEY)];
+  memcpy(appskey, APPSKEY, sizeof(APPSKEY));
+  memcpy(nwkskey, NWKSKEY, sizeof(NWKSKEY));
+  LMIC_setSession (0x1, DEVADDR, nwkskey, appskey);
+
   LMIC_setupChannel(0, 868100000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
   LMIC_setupChannel(1, 868300000, DR_RANGE_MAP(DR_SF12, DR_SF7B), BAND_CENTI);      // g-band
   LMIC_setupChannel(2, 868500000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
@@ -236,13 +258,15 @@ void app_main(void)
 
   LMIC_setLinkCheckMode(0);
   LMIC.dn2Dr = DR_SF9;
-//LMIC_setDrTxpow(DR_SF10,14);
-  LMIC_setDrTxpow(DR_SF7,14);
+  LMIC.datarate = DR_SF9;
+  LMIC_setDrTxpow(DR_SF9,14);
+  LMIC.txChnl = 0;
+  //LMIC_setDrTxpow(DR_SF7,14);
 
   for(int i = 1; i <= 8; i++) LMIC_disableChannel(i);
   //printf("Avvio Join\n");
   //LMIC_startJoining();
   //printf("Join Completo\n");
   //xTaskCreate(bmp280_test, "bmp280_test", 1024 * 4, (void* )0, 3, NULL);	
-  xTaskCreate(msg_test, "msg_test", 1024 * 4, (void* )0, 3, NULL);	
+  xTaskCreate(os_runloop, "os_runloop", 1024 * 4, (void* )0, 3, NULL);	
 }

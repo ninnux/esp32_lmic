@@ -7,13 +7,14 @@
 #include "driver/timer.h"
 #include "esp_log.h"
 
-#define LORA_SPI_HOST      HSPI_HOST
-#define LORA_SPI_DMA_CHAN  1
+
+//#define LORA_SPI_HOST      HSPI_HOST
+//#define LORA_SPI_DMA_CHAN  1
 #define LORA_PIN_SPI_SCLK  CONFIG_LORA_PIN_SPI_SCLK
 #define LORA_PIN_SPI_MOSI  CONFIG_LORA_PIN_SPI_MOSI
 #define LORA_PIN_SPI_MISO  CONFIG_LORA_PIN_SPI_MISO
 #define LORA_PIN_NSS       CONFIG_LORA_PIN_NSS
-#define LORA_PIN_RXTX      TTN_NOT_CONNECTED
+//##define LORA_PIN_RXTX      TTN_NOT_CONNECTED
 #define LORA_PIN_RST       CONFIG_LORA_PIN_RST
 #define LORA_PIN_DIO0      CONFIG_LORA_PIN_DIO0
 #define LORA_PIN_DIO1      CONFIG_LORA_PIN_DIO1
@@ -26,6 +27,10 @@ const lmic_pinmap_t lmic_pins = {
     .dio = {LORA_PIN_DIO0, LORA_PIN_DIO1, LORA_PIN_DIO2},
     .spi = {LORA_PIN_SPI_MISO,LORA_PIN_SPI_MOSI,LORA_PIN_SPI_SCLK},
 };
+
+
+// -----------------------------------------------------------------------------
+// I/O
 
 static void hal_io_init () {
   ESP_LOGI(TAG, "Starting IO initialization");
