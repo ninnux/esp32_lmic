@@ -75,8 +75,6 @@ void lorasetup(void) {
 }
 
 
-
-
 void sendMessages(osjob_t* j) {
    lorasetup();
    LMIC_setSession (0x1, DevAdd, NetKey, AppKey);
@@ -200,7 +198,7 @@ void bmp280_test(void *pvParamters)
 	int b = 0; 
         int e = 0;
 	int pa = 0;
-        vTaskDelay(TX_INTERVAL * 1000/ portTICK_PERIOD_MS);
+        vTaskDelay(30 * 1000/ portTICK_PERIOD_MS);
         if (bmp280_read_float(&dev, &temperature, &pressure, &humidity) != ESP_OK)
         {
             printf("Temperature/pressure reading failed\n");
@@ -260,5 +258,6 @@ void LoraStart(void) {
 void app_main(void)
 {
   os_init();
+  xTaskCreate(bmp280_test, "bmp280_test", 1024 * 4, (void* )0, 3, NULL);	
   xTaskCreate(LoraStart, "LoraStart", 1024 * 4, (void* )0, 3, NULL);	
 }
