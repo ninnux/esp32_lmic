@@ -227,24 +227,24 @@ void LoraStart(void) {
   memcpy(nwkskey, NWKSKEY, sizeof(NWKSKEY));
   LMIC_setSession (0x1, DEVADDR, nwkskey, appskey);
 */
-  LMIC_setupChannel(0, 868100000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
-  LMIC_setupChannel(1, 868300000, DR_RANGE_MAP(DR_SF12, DR_SF7B), BAND_CENTI);      // g-band
-  LMIC_setupChannel(2, 868500000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
-  LMIC_setupChannel(3, 867100000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
-  LMIC_setupChannel(4, 867300000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
-  LMIC_setupChannel(5, 867500000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
-  LMIC_setupChannel(6, 867700000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
-  LMIC_setupChannel(7, 867900000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
-  LMIC_setupChannel(8, 868800000, DR_RANGE_MAP(DR_FSK, DR_FSK), BAND_MILLI); // g2-band
-
-  LMIC_setLinkCheckMode(0);
-  LMIC.dn2Dr = DR_SF9;
-  //LMIC.datarate = DR_SF9;
-  LMIC_setDrTxpow(DR_SF7,14);
-  //LMIC.txChnl = 0;
-  //LMIC_setDrTxpow(DR_SF7,14);
-
-  for(int i = 1; i <= 8; i++) LMIC_disableChannel(i);
+//  LMIC_setupChannel(0, 868100000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
+//  LMIC_setupChannel(1, 868300000, DR_RANGE_MAP(DR_SF12, DR_SF7B), BAND_CENTI);      // g-band
+//  LMIC_setupChannel(2, 868500000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
+//  LMIC_setupChannel(3, 867100000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
+//  LMIC_setupChannel(4, 867300000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
+//  LMIC_setupChannel(5, 867500000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
+//  LMIC_setupChannel(6, 867700000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
+//  LMIC_setupChannel(7, 867900000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
+//  LMIC_setupChannel(8, 868800000, DR_RANGE_MAP(DR_FSK, DR_FSK), BAND_MILLI); // g2-band
+//
+//  LMIC_setLinkCheckMode(0);
+//  LMIC.dn2Dr = DR_SF9;
+//  //LMIC.datarate = DR_SF9;
+//  LMIC_setDrTxpow(DR_SF7,14);
+//  //LMIC.txChnl = 0;
+//  //LMIC_setDrTxpow(DR_SF7,14);
+//
+//  for(int i = 1; i <= 8; i++) LMIC_disableChannel(i);
   // Task Loop
     sendMessages(&sendjob);
     for (;;) {
@@ -258,6 +258,7 @@ void LoraStart(void) {
 void app_main(void)
 {
   os_init();
-  xTaskCreate(bmp280_test, "bmp280_test", 1024 * 4, (void* )0, 3, NULL);	
+  //xTaskCreate(bmp280_test, "bmp280_test", 1024 * 4, (void* )0, 3, NULL);	
+  sprintf((char*)msgData,"Ciaoooo");
   xTaskCreate(LoraStart, "LoraStart", 1024 * 4, (void* )0, 3, NULL);	
 }
