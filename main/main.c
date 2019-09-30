@@ -35,14 +35,21 @@ unsigned int DevAdd;
 unsigned char NetKey[16];
 unsigned char AppKey[16];
 
+static const u1_t APPEUI[8]={ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+void os_getArtEui (u1_t* buf) { memcpy(buf, APPEUI, 8);}
+static const u1_t DEVEUI[8]={ 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+void os_getDevEui (u1_t* buf) { memcpy(buf, DEVEUI, 8);}
+static const u1_t APPKEY[16] = { 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA };
+void os_getDevKey (u1_t* buf) {  memcpy(buf, APPKEY, 16);}
+
 
 //u1_t NWKSKEY[16] = { 0xa2, 0x25, 0xb5, 0x22, 0x8f, 0xe5, 0xb8, 0x18, 0xb6, 0x19, 0xc1, 0xb0, 0x9b, 0xc8, 0xdb, 0xd2 };
 //u1_t APPSKEY[16] = { 0xfa, 0x4c, 0xd4, 0xd2, 0x78, 0x0d, 0x77, 0xc1, 0x03, 0x82, 0xab, 0x77, 0xdb, 0xd8, 0xe7, 0x00 };
 //u4_t DEVADDR = 0x07a56a5e;
 
-void os_getArtEui (u1_t* buf) { }
-void os_getDevEui (u1_t* buf) { }
-void os_getDevKey (u1_t* buf) { }
+//void os_getArtEui (u1_t* buf) { }
+//void os_getDevEui (u1_t* buf) { }
+//void os_getDevKey (u1_t* buf) { }
 
 static uint8_t msgData[40] = "Ciao!";
 unsigned char mydata[] = "Ciao!";
@@ -76,8 +83,8 @@ void lorasetup(void) {
 
 
 void sendMessages(osjob_t* j) {
-   lorasetup();
-   LMIC_setSession (0x1, DevAdd, NetKey, AppKey);
+   //lorasetup();
+   //LMIC_setSession (0x1, DevAdd, NetKey, AppKey);
 
   if (LMIC.opmode & OP_TXRXPEND) {
       printf("OP_TXRXPEND, not sending");
@@ -111,6 +118,7 @@ void onEvent (ev_t ev) {
             break;
         case EV_JOINED:
             printf("EV_JOINED\n");
+	    sendMessages(&sendjob);	    
             break;
         case EV_RFU1:
             printf("EV_RFU1\n");
@@ -162,62 +170,10 @@ esp_err_t event_handler(void *ctx, system_event_t *event)
     return ESP_OK;
 }
 
-void bmp280_test(void *pvParamters)
-{
-    bmp280_params_t params;
-    bmp280_init_default_params(&params);
-    bmp280_t dev;
-
-    esp_err_t res;
-
-    while (i2cdev_init() != ESP_OK)
-    {
-        printf("Could not init I2Cdev library\n");
-        vTaskDelay(250 / portTICK_PERIOD_MS);
-    }
-
-    while (bmp280_init_desc(&dev, BMP280_I2C_ADDRESS_1, I2C_NUM_0, SDA_GPIO, SCL_GPIO) != ESP_OK)
-    {
-        printf("Could not init device descriptor\n");
-        vTaskDelay(250 / portTICK_PERIOD_MS);
-    }
-
-    while ((res = bmp280_init(&dev, &params)) != ESP_OK)
-    {
-        printf("Could not init BMP280, err: %d\n", res);
-        vTaskDelay(250 / portTICK_PERIOD_MS);
-    }
-
-    bool bme280p = dev.id == BME280_CHIP_ID;
-    printf("BMP280: found %s\n", bme280p ? "BME280" : "BMP280");
-
-    float pressure, temperature, humidity;
-
-    while (1)
-    {
-	int b = 0; 
-        int e = 0;
-	int pa = 0;
-        vTaskDelay(30 * 1000/ portTICK_PERIOD_MS);
-        if (bmp280_read_float(&dev, &temperature, &pressure, &humidity) != ESP_OK)
-        {
-            printf("Temperature/pressure reading failed\n");
-            continue;
-        }
-
-        printf("Pressure: %.2f Pa, Temperature: %.2f C", pressure, temperature);
-	sprintf((char*)msgData,"|%.2f|%.2f|0.00|%i|%i|%i",temperature,pressure,b,e,pa);
-        if (bme280p)
-            printf(", Humidity: %.2f\n", humidity);
-        else
-            printf("\n");
-    }
-}
-
 void LoraStart(void) {
  // Steup Radio 
-  LMIC_reset();
-  printf("LMIC RESET\n");
+//  LMIC_reset();
+//  printf("LMIC RESET\n");
 //  lorasetup();
 //  LMIC_setSession (0x1, DevAdd, NetKey, AppKey);
    /*
@@ -246,7 +202,7 @@ void LoraStart(void) {
 //
 //  for(int i = 1; i <= 8; i++) LMIC_disableChannel(i);
   // Task Loop
-    sendMessages(&sendjob);
+//    sendMessages(&sendjob);
     for (;;) {
         os_runloop_once();
         vTaskDelay(1);
@@ -258,7 +214,10 @@ void LoraStart(void) {
 void app_main(void)
 {
   os_init();
+  LMIC_reset();
+  LMIC_startJoining(); 
   //xTaskCreate(bmp280_test, "bmp280_test", 1024 * 4, (void* )0, 3, NULL);	
   sprintf((char*)msgData,"Ciaoooo");
+  sendMessages(&sendjob);
   xTaskCreate(LoraStart, "LoraStart", 1024 * 4, (void* )0, 3, NULL);	
 }
