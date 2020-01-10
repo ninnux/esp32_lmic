@@ -9,6 +9,10 @@
 #include "lmic.h"
 #include "bmp280.h"
 
+#include "cayenne_lpp.h"
+
+cayenne_lpp_t lpp = { 0 };
+
 #define SDA_GPIO GPIO_NUM_21
 #define SCL_GPIO GPIO_NUM_22
 
@@ -206,7 +210,10 @@ void bmp280_test(void *pvParamters)
         }
 
         printf("Pressure: %.2f Pa, Temperature: %.2f C", pressure, temperature);
-	sprintf((char*)msgData,"|%.2f|%.2f|0.00|%i|%i|%i",temperature,pressure,b,e,pa);
+	//sprintf((char*)msgData,"|%.2f|%.2f|0.00|%i|%i|%i",temperature,pressure,b,e,pa);
+        cayenne_lpp_add_temperature(&lpp, 0, temperature);
+        cayenne_lpp_add_barometric_pressure(&lpp, 0, pressure);
+
         if (bme280p)
             printf(", Humidity: %.2f\n", humidity);
         else
