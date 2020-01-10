@@ -58,6 +58,17 @@ static osjob_t sendjob;
 float miop;
 float miot;
 
+static void _print_buffer(cayenne_lpp_t *lpp)
+{
+    printf("buffer:");
+    uint8_t i=0;
+    for (i = 0; i < lpp->cursor; ++i) {
+    printf("%0X",lpp->buffer[i]);
+    }
+    printf("\n");
+
+}
+
 void lorasetup(void) {
     const char devadd[]= CONFIG_devAdd;
     const char netkey[]= CONFIG_netKey , *pn = netkey;
@@ -90,6 +101,10 @@ void sendMessages(osjob_t* j) {
   } else {
       // Prepare upstream data transmission at the next possible time.
       //LMIC_setTxData2(1, msgData, sizeof(msgData)-1, 0);
+      cayenne_lpp_reset(&lpp);
+      cayenne_lpp_add_temperature(&lpp, 0, miot);
+      cayenne_lpp_add_barometric_pressure(&lpp, 0, miop);
+      _print_buffer(&lpp);
       printf("mando %d bytes in lpp\n",lpp.cursor);
       LMIC_setTxData2(1, lpp.buffer, lpp.cursor, 0);
       printf("Packet sent");
@@ -270,7 +285,5 @@ void app_main(void)
 {
   os_init();
   xTaskCreate(bmp280_test, "bmp280_test", 1024 * 4, (void* )0, 3, NULL);	
-  cayenne_lpp_add_temperature(&lpp, 0, miot);
-  cayenne_lpp_add_barometric_pressure(&lpp, 0, miop);
   xTaskCreate(LoraStart, "LoraStart", 1024 * 4, (void* )0, 3, NULL);	
 }
