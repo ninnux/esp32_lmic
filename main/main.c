@@ -103,7 +103,7 @@ void sendMessages(osjob_t* j) {
       //LMIC_setTxData2(1, msgData, sizeof(msgData)-1, 0);
       cayenne_lpp_reset(&lpp);
       cayenne_lpp_add_temperature(&lpp, 0, miot);
-      cayenne_lpp_add_barometric_pressure(&lpp, 0, miop);
+      cayenne_lpp_add_barometric_pressure(&lpp, 0, miop/100);
       _print_buffer(&lpp);
       printf("mando %d bytes in lpp\n",lpp.cursor);
       LMIC_setTxData2(1, lpp.buffer, lpp.cursor, 0);
