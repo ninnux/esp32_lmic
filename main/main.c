@@ -55,6 +55,8 @@ const unsigned TX_INTERVAL = CONFIG_LORA_TX_INTERVAL;
 
 static osjob_t sendjob;
 
+float miop;
+float miot;
 
 void lorasetup(void) {
     const char devadd[]= CONFIG_devAdd;
@@ -87,7 +89,9 @@ void sendMessages(osjob_t* j) {
       printf("OP_TXRXPEND, not sending");
   } else {
       // Prepare upstream data transmission at the next possible time.
-      LMIC_setTxData2(1, msgData, sizeof(msgData)-1, 0);
+      //LMIC_setTxData2(1, msgData, sizeof(msgData)-1, 0);
+      printf("mando %d bytes in lpp\n",lpp.cursor);
+      LMIC_setTxData2(1, lpp.buffer, lpp.cursor, 0);
       printf("Packet sent");
   }
 
@@ -211,8 +215,8 @@ void bmp280_test(void *pvParamters)
 
         printf("Pressure: %.2f Pa, Temperature: %.2f C", pressure, temperature);
 	//sprintf((char*)msgData,"|%.2f|%.2f|0.00|%i|%i|%i",temperature,pressure,b,e,pa);
-        cayenne_lpp_add_temperature(&lpp, 0, temperature);
-        cayenne_lpp_add_barometric_pressure(&lpp, 0, pressure);
+        miot=temperature;
+        miop=pressure;
 
         if (bme280p)
             printf(", Humidity: %.2f\n", humidity);
@@ -266,5 +270,7 @@ void app_main(void)
 {
   os_init();
   xTaskCreate(bmp280_test, "bmp280_test", 1024 * 4, (void* )0, 3, NULL);	
+  cayenne_lpp_add_temperature(&lpp, 0, miot);
+  cayenne_lpp_add_barometric_pressure(&lpp, 0, miop);
   xTaskCreate(LoraStart, "LoraStart", 1024 * 4, (void* )0, 3, NULL);	
 }
